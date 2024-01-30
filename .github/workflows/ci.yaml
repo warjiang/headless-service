@@ -33,17 +33,24 @@ jobs:
       run: echo "APP=${{ steps.regex-match.outputs.group1 }}" >> $GITHUB_ENV
 
     - name: Log into the Container registry
-      uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
+      uses: docker/login-action@v2
       with:
         registry: ${{ env.REGISTRY }}
         username: ${{ secrets.GIT_USERNAME }}
         password: ${{ secrets.GIT_GHR_SECRET }}
+    
+    - name: Log into the Private Container registry
+      uses: docker/login-action@v2
+      with:
+        registry: ${{ secrets.PRIVATE_REGISTRY }}
+        username: ${{ secrets.PRIVATE_REGISTRY_USERNAME }}
+        password: ${{ secrets.PRIVATE_REGISTRY_PASSWORD }}
 
     - name: Extract metadata for the Docker image
       id: meta
       uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
       with:
-        images: ${{ env.REGISTRY }}/${{ env.GIT_ACCOUNT }}/${{ env.APP }}
+        images: ${{ env.GIT_ACCOUNT }}/${{ env.APP }}
         tags: type=match,pattern=\d.\d.\d
 
     - name: Build and push the Docker image
@@ -51,7 +58,10 @@ jobs:
       with:
         context: .
         push: true
-        tags: ${{ steps.meta.outputs.tags }}
+        tags: |
+            ${{ secrets.PRIVATE_REGISTRY }}/container/${{ steps.meta.outputs.tags }}
+            ${{ env.REGISTRY }}/${{ steps.meta.outputs.tags }}
+        # tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
         build-args: |
           "APP=${{ env.APP }}"
