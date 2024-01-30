@@ -4,5 +4,5 @@ echo "[$(date '+%Y-%m-%d %H:%M:%S')] - chrome start success..."
 
 
 echo "[$(date '+%Y-%m-%d %H:%M:%S')] - start main app..."
-node dist/server.js
+node dist/main.js
 echo "[$(date '+%Y-%m-%d %H:%M:%S')] - main app start sucess..."
